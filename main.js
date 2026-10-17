@@ -3,6 +3,9 @@ const path = require('path');
 const fs = require('fs');
 const fsp = fs.promises;
 const { spawn } = require('child_process');
+const http = require('http');
+const https = require('https');
+const tls = require('tls');
 
 // Портативный Git, который скачивает запуск.bat, если Git не установлен в системе
 const LOCAL_GIT = path.join(__dirname, 'runtime', 'git', 'cmd');
@@ -800,7 +803,7 @@ ipcMain.handle('check-repo', async (event, { owner, name }) => {
     return {
       valid: true, sanitized, exists: true,
       fullName: repo.full_name, private: repo.private, htmlUrl: repo.html_url,
-      defaultBranch: repo.default_branch, empty: repo.size === 0,
+      defaultBranch: repo.default_branch,
       canPush: !repo.permissions || repo.permissions.push
     };
   } catch (e) {
@@ -949,6 +952,18 @@ function repoPath(owner, repo) {
   return `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;
 }
 
+// Поле size у репозитория GitHub пересчитывает с задержкой (у свежих репозиториев там 0),
+// поэтому пустоту проверяем по наличию коммитов: для пустого репозитория API отвечает 409
+async function isRepoEmpty(owner, repo) {
+  try {
+    await githubRequest('GET', `${repoPath(owner, repo)}/commits?per_page=1`);
+    return false;
+  } catch (e) {
+    if (e.status === 409) return true;
+    return false;
+  }
+}
+
 function mapRelease(r) {
   return {
     id: r.id,
@@ -975,33 +990,103 @@ function mapRelease(r) {
   };
 }
 
-function uploadAsset(uploadUrl, filePath, onProgress) {
+// Прокси для прямых HTTPS-соединений Node.js (системный прокси Windows или HTTPS_PROXY)
+async function getProxyFor(url) {
+  try {
+    const rule = await session.defaultSession.resolveProxy(url);
+    const m = rule.match(/PROXY\s+([^;\s]+)/i);
+    if (m) {
+      const u = new URL('http://' + m[1]);
+      return { host: u.hostname, port: Number(u.port) || 80 };
+    }
+    if (/^DIRECT/i.test(rule.trim())) return null;
+  } catch (e) {}
+  const env = process.env.HTTPS_PROXY || process.env.https_proxy;
+  if (env) {
+    try {
+      const u = new URL(env);
+      return { host: u.hostname, port: Number(u.port) || 80 };
+    } catch (e) {}
+  }
+  return null;
+}
+
+function openTunnel(proxy, host, port) {
   return new Promise((resolve, reject) => {
-    let size;
-    try { size = fs.statSync(filePath).size; } catch (e) { reject(new Error('Файл не найден: ' + filePath)); return; }
-    const name = path.basename(filePath);
-    const url = uploadUrl.replace(/\{.*\}$/, '') + '?name=' + encodeURIComponent(name);
+    const req = http.request({
+      host: proxy.host,
+      port: proxy.port,
+      method: 'CONNECT',
+      path: `${host}:${port}`,
+      headers: { Host: `${host}:${port}` }
+    });
+    req.setTimeout(30000, () => req.destroy(new Error('прокси не отвечает')));
+    req.on('connect', (res, socket) => {
+      if (res.statusCode === 200) resolve(socket);
+      else {
+        socket.destroy();
+        reject(new Error('прокси отклонил соединение (' + res.statusCode + ')'));
+      }
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
 
-    const req = net.request({ method: 'POST', url });
-    currentRequest = req;
-    req.setHeader('Authorization', 'Bearer ' + auth.token);
-    req.setHeader('Accept', 'application/vnd.github+json');
-    req.setHeader('Content-Type', 'application/octet-stream');
-    req.setHeader('Content-Length', String(size));
+// Загрузка файла через https Node.js: модуль net Electron не позволяет задать Content-Length,
+// без которого uploads.github.com не принимает файл
+async function uploadAsset(uploadUrl, filePath, onProgress) {
+  let size;
+  try { size = fs.statSync(filePath).size; } catch (e) { throw new Error('Файл не найден: ' + filePath); }
+  const name = path.basename(filePath);
+  const target = new URL(uploadUrl.replace(/\{.*\}$/, ''));
+  target.searchParams.set('name', name);
 
+  const proxy = await getProxyFor(target.href);
+  let tunnel = null;
+  if (proxy) {
+    try {
+      tunnel = await openTunnel(proxy, target.hostname, 443);
+    } catch (e) {
+      throw new Error(`Ошибка загрузки файла ${name}: ${e.message}`);
+    }
+  }
+  checkCancel();
+
+  return new Promise((resolve, reject) => {
+    const options = {
+      method: 'POST',
+      hostname: target.hostname,
+      port: 443,
+      path: target.pathname + target.search,
+      headers: {
+        Authorization: 'Bearer ' + auth.token,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'User-Agent': 'GitLoader',
+        'Content-Type': 'application/octet-stream',
+        'Content-Length': size
+      }
+    };
+    if (tunnel) options.createConnection = () => tls.connect({ socket: tunnel, servername: target.hostname });
+
+    const req = https.request(options);
     let settled = false;
     let stream = null;
     const finish = (fn, value) => {
       if (settled) return;
       settled = true;
-      if (currentRequest === req) currentRequest = null;
+      if (currentRequest && currentRequest.req === req) currentRequest = null;
       if (stream) stream.destroy();
       fn(value);
     };
+    currentRequest = { req, abort: () => { req.destroy(); finish(reject, new CancelError()); } };
 
+    req.setTimeout(120000, () => req.destroy(new Error('сервер не отвечает')));
     req.on('response', (res) => {
       let text = '';
-      res.on('data', (c) => { text += c.toString(); });
+      res.setEncoding('utf8');
+      res.on('data', (c) => { text += c; });
       res.on('end', () => {
         let data = null;
         try { data = text ? JSON.parse(text) : null; } catch (e) {}
@@ -1013,21 +1098,20 @@ function uploadAsset(uploadUrl, filePath, onProgress) {
         finish(reject, err);
       });
     });
-    req.on('abort', () => finish(reject, new CancelError()));
-    req.on('error', (e) => finish(reject, cancelRequested ? new CancelError() : new Error('Ошибка загрузки файла ' + name + ': ' + e.message)));
+    req.on('error', (e) => finish(reject, cancelRequested ? new CancelError() : new Error(`Ошибка загрузки файла ${name}: ${e.message}`)));
 
-    stream = fs.createReadStream(filePath, { highWaterMark: 1024 * 1024 });
+    stream = fs.createReadStream(filePath, { highWaterMark: 512 * 1024 });
     let sent = 0;
     stream.on('data', (chunk) => {
-      stream.pause();
-      req.write(chunk, () => {
-        sent += chunk.length;
-        onProgress(sent, size);
-        if (!settled) stream.resume();
-      });
+      sent += chunk.length;
+      onProgress(sent, size);
+      if (!req.write(chunk)) {
+        stream.pause();
+        req.once('drain', () => { if (!settled) stream.resume(); });
+      }
     });
     stream.on('end', () => req.end());
-    stream.on('error', (e) => { req.abort(); finish(reject, e); });
+    stream.on('error', (e) => { req.destroy(); finish(reject, e); });
   });
 }
 
@@ -1084,9 +1168,10 @@ ipcMain.handle('describe-files', (event, paths) => {
 
 ipcMain.handle('list-releases', async (event, { owner, repo }) => {
   try {
-    const [releases, info] = await Promise.all([
+    const [releases, info, empty] = await Promise.all([
       githubRequest('GET', `${repoPath(owner, repo)}/releases?per_page=50`),
-      githubRequest('GET', repoPath(owner, repo))
+      githubRequest('GET', repoPath(owner, repo)),
+      isRepoEmpty(owner, repo)
     ]);
     let latestId = null;
     try {
@@ -1098,7 +1183,7 @@ ipcMain.handle('list-releases', async (event, { owner, repo }) => {
       releases: releases.map(mapRelease),
       latestId,
       defaultBranch: info.default_branch,
-      empty: info.size === 0,
+      empty,
       htmlUrl: info.html_url
     };
   } catch (e) {
