@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://avatars.githubusercontent.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitLoader</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-logo" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.79-.26.79-.58v-2.23c-3.34.73-4.03-1.42-4.03-1.42-.55-1.39-1.33-1.76-1.33-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.49 1 .11-.78.42-1.31.76-1.6-2.67-.31-5.47-1.34-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.65 1.65.24 2.87.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.48 5.92.43.37.82 1.1.82 2.22v3.29c0 .32.19.69.8.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m0 0l-5 5m5-5l5 5M4 20h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-repo" viewBox="0 0 24 24"><path d="M5 4a2 2 0 0 1 2-2h12v16H7a2 2 0 0 0-2 2V4zm0 16a2 2 0 0 0 2 2h12v-4M9 6h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8m0-5v5h5m4-1v5l3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12m0 0l-5-5m5 5l5-5M4 20h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.9-3M4 4v4h4m-4 5a8 8 0 0 0 14.9 3M20 20v-4h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9L12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24"><path d="M15 4l5 5-5 5M20 9H9a5 5 0 0 0 0 10h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5m5 5H3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3l10 18H2L12 3zm0 7v4m0 3v.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6m0-9.5V8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-branch" viewBox="0 0 24 24"><circle cx="6" cy="5" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="19" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="7" r="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6 7v10m12-8c0 5-6 4-12 8" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9-9-9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8l-5-5zm0 0v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-3-7-7-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </svg>
+
+  <div class="app">
+    <header class="titlebar">
+      <div class="titlebar-brand">
+        <svg class="icon brand-icon"><use href="#i-logo"/></svg>
+        <span>GitLoader</span>
+      </div>
+      <div class="window-controls">
+        <button class="win-btn" id="minimizeBtn" title="Свернуть"><svg viewBox="0 0 12 12"><path d="M2 6h8" stroke="currentColor" stroke-width="1.2"/></svg></button>
+        <button class="win-btn" id="maximizeBtn" title="Развернуть"><svg viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></button>
+        <button class="win-btn close" id="closeBtn" title="Закрыть"><svg viewBox="0 0 12 12"><path d="M2.5 2.5l7 7m0-7l-7 7" stroke="currentColor" stroke-width="1.2"/></svg></button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <nav class="nav">
+          <button class="nav-item active" data-view="upload"><svg class="icon"><use href="#i-upload"/></svg><span>Загрузка</span></button>
+          <button class="nav-item" data-view="repos" data-auth><svg class="icon"><use href="#i-repo"/></svg><span>Репозитории</span></button>
+          <button class="nav-item" data-view="releases" data-auth><svg class="icon"><use href="#i-tag"/></svg><span>Релизы</span></button>
+          <button class="nav-item" data-view="history"><svg class="icon"><use href="#i-history"/></svg><span>История</span><span class="nav-badge hidden" id="historyBadge"></span></button>
+          <button class="nav-item" data-view="settings"><svg class="icon"><use href="#i-settings"/></svg><span>Настройки</span></button>
+        </nav>
+        <div class="sidebar-user hidden" id="sidebarUser">
+          <img class="avatar" id="userAvatar" alt="">
+          <div class="sidebar-user-info">
+            <span class="sidebar-user-name" id="userName"></span>
+            <span class="sidebar-user-login" id="userLogin"></span>
+          </div>
+          <button class="icon-btn" id="logoutBtn" title="Выйти"><svg class="icon"><use href="#i-logout"/></svg></button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="banner warn hidden" id="gitBanner">
+          <svg class="icon"><use href="#i-warn"/></svg>
+          <div class="banner-text"><b>Git не найден.</b> Для загрузки проектов нужен установленный Git.</div>
+          <button class="btn btn-sm" id="gitDownloadBtn">Скачать Git</button>
+          <button class="btn btn-sm btn-ghost" id="gitRecheckBtn">Проверить снова</button>
+        </div>
+        <div class="banner info hidden" id="offlineBanner">
+          <svg class="icon"><use href="#i-info"/></svg>
+          <div class="banner-text">Нет связи с GitHub. Проверьте подключение к интернету.</div>
+          <button class="btn btn-sm btn-ghost" id="offlineRetryBtn">Повторить</button>
+        </div>
+
+        <!-- Авторизация -->
+        <section class="view" id="view-auth">
+          <div class="auth-wrap">
+            <div class="auth-hero">
+              <svg class="icon auth-logo"><use href="#i-logo"/></svg>
+              <h1>GitLoader</h1>
+              <p>Загружайте проекты на GitHub в пару кликов</p>
+            </div>
+            <div class="card auth-card">
+              <ol class="steps-list">
+                <li>
+                  <div class="step-num">1</div>
+                  <div class="step-body">
+                    <b>Создайте токен доступа</b>
+                    <p class="muted">Откроется GitHub с уже отмеченными правами <code>repo</code> и <code>read:org</code>. Нажмите внизу «Generate token».</p>
+                    <button class="btn btn-github" id="openTokenBtn"><svg class="icon"><use href="#i-github"/></svg>Создать токен на GitHub</button>
+                  </div>
+                </li>
+                <li>
+                  <div class="step-num">2</div>
+                  <div class="step-body">
+                    <b>Вставьте токен</b>
+                    <div class="input-wrap">
+                      <input type="password" id="tokenInput" class="input" placeholder="ghp_... или github_pat_..." autocomplete="off" spellcheck="false">
+                      <button class="icon-btn input-addon" id="toggleTokenBtn" title="Показать токен"><svg class="icon"><use href="#i-eye"/></svg></button>
+                    </div>
+                    <button class="btn btn-primary" id="authBtn"><span class="btn-label">Войти</span></button>
+                  </div>
+                </li>
+              </ol>
+              <p class="muted small center">Токен хранится только на этом компьютере в зашифрованном виде.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Загрузка -->
+        <section class="view hidden" id="view-upload">
+          <div class="view-header">
+            <div>
+              <h2>Загрузка проекта</h2>
+              <p class="muted">Создайте новый репозиторий или обновите существующий</p>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="col">
+              <div class="card">
+                <div class="card-title">Папка проекта</div>
+                <div class="dropzone" id="dropzone" tabindex="0">
+                  <svg class="icon dz-icon"><use href="#i-folder"/></svg>
+                  <div class="dz-text">
+                    <b>Перетащите папку сюда</b>
+                    <span class="muted">или нажмите, чтобы выбрать</span>
+                  </div>
+                </div>
+                <div class="folder-info hidden" id="folderInfo">
+                  <div class="folder-head">
+                    <svg class="icon"><use href="#i-folder"/></svg>
+                    <div class="folder-path" id="folderPathText" title=""></div>
+                    <button class="icon-btn" id="openFolderBtn" title="Открыть в проводнике"><svg class="icon"><use href="#i-external"/></svg></button>
+                    <button class="icon-btn" id="changeFolderBtn" title="Выбрать другую папку"><svg class="icon"><use href="#i-refresh"/></svg></button>
+                  </div>
+                  <div class="chips" id="folderChips"></div>
+                  <div class="folder-warnings" id="folderWarnings"></div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-title">Репозиторий</div>
+                <label class="field-label">Владелец и название</label>
+                <div class="repo-name-row">
+                  <select class="input owner-select" id="ownerSelect"></select>
+                  <span class="slash">/</span>
+                  <input type="text" id="repoName" class="input" placeholder="my-project" spellcheck="false">
+                </div>
+                <div class="repo-status" id="repoStatus"></div>
+
+                <label class="field-label" for="repoDesc">Описание <span class="muted">(необязательно)</span></label>
+                <input type="text" id="repoDesc" class="input" placeholder="Коротко о проекте" maxlength="350">
+
+                <label class="field-label">Видимость</label>
+                <div class="segmented" id="visibility">
+                  <button data-value="public" class="active"><svg class="icon"><use href="#i-globe"/></svg>Публичный</button>
+                  <button data-value="private"><svg class="icon"><use href="#i-lock"/></svg>Приватный</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="col">
+              <div class="card">
+                <div class="card-title">Коммит</div>
+                <div class="row-2">
+                  <div>
+                    <label class="field-label" for="branchInput">Ветка</label>
+                    <div class="input-icon">
+                      <svg class="icon"><use href="#i-branch"/></svg>
+                      <input type="text" id="branchInput" class="input" value="main" spellcheck="false">
+                    </div>
+                  </div>
+                  <div>
+                    <label class="field-label" for="commitMsg">Сообщение коммита</label>
+                    <input type="text" id="commitMsg" class="input" placeholder="Первая загрузка">
+                  </div>
+                </div>
+              </div>
+
+              <details class="card collapsible" id="advanced">
+                <summary class="card-title"><svg class="icon chevron"><use href="#i-chevron"/></svg>Дополнительно</summary>
+                <div class="adv-body">
+                  <div class="row-2">
+                    <div>
+                      <label class="field-label" for="gitignoreSelect">Шаблон .gitignore</label>
+                      <select class="input" id="gitignoreSelect">
+                        <option value="auto">Автоопределение</option>
+                        <option value="none">Не создавать</option>
+                      </select>
+                      <p class="hint" id="gitignoreHint"></p>
+                    </div>
+                    <div>
+                      <label class="field-label" for="licenseSelect">Лицензия</label>
+                      <select class="input" id="licenseSelect">
+                        <option value="none">Без лицензии</option>
+                      </select>
+                      <p class="hint" id="licenseHint"></p>
+                    </div>
+                  </div>
+                  <label class="check"><input type="checkbox" id="readmeCheck" checked><span class="box"></span>Создать README.md, если его нет</label>
+                  <label class="check"><input type="checkbox" id="openAfterCheck"><span class="box"></span>Открыть репозиторий в браузере после загрузки</label>
+                  <label class="check danger"><input type="checkbox" id="forceCheck"><span class="box"></span>Перезаписать ветку на GitHub (force push)</label>
+                </div>
+              </details>
+
+              <div class="actions">
+                <button class="btn btn-primary btn-lg" id="uploadBtn" disabled>
+                  <svg class="icon"><use href="#i-upload"/></svg><span class="btn-label">Загрузить на GitHub</span>
+                </button>
+                <button class="btn btn-ghost hidden" id="cancelBtn">Отмена</button>
+              </div>
+              <p class="hint center" id="uploadHint">Выберите папку и укажите название репозитория</p>
+            </div>
+          </div>
+
+          <div class="card progress-card hidden" id="progressCard">
+            <div class="stepper" id="stepper">
+              <div class="step" data-step="check"><span class="dot"></span>Проверка</div>
+              <div class="step" data-step="repo"><span class="dot"></span>Репозиторий</div>
+              <div class="step" data-step="prepare"><span class="dot"></span>Файлы</div>
+              <div class="step" data-step="commit"><span class="dot"></span>Коммит</div>
+              <div class="step" data-step="push"><span class="dot"></span>Отправка</div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-meta">
+              <span id="progressText">Подготовка...</span>
+              <span id="progressPercent">0%</span>
+            </div>
+
+            <div class="result hidden" id="resultBox"></div>
+
+            <details class="log-details" id="logDetails">
+              <summary><svg class="icon chevron"><use href="#i-chevron"/></svg>Журнал операций <button class="link-btn" id="copyLogBtn">Копировать</button></summary>
+              <pre class="log" id="logOutput"></pre>
+            </details>
+          </div>
+        </section>
+
+        <!-- Репозитории -->
+        <section class="view hidden" id="view-repos">
+          <div class="view-header">
+            <div>
+              <h2>Мои репозитории</h2>
+              <p class="muted" id="reposCount">Загрузка списка...</p>
+            </div>
+            <button class="btn btn-ghost" id="reposRefreshBtn"><svg class="icon"><use href="#i-refresh"/></svg>Обновить</button>
+          </div>
+          <div class="toolbar">
+            <input type="search" class="input" id="reposSearch" placeholder="Поиск по названию, описанию, языку...">
+            <select class="input toolbar-select" id="reposFilter">
+              <option value="all">Все</option>
+              <option value="public">Публичные</option>
+              <option value="private">Приватные</option>
+              <option value="own">Только мои</option>
+            </select>
+            <select class="input toolbar-select" id="reposSort">
+              <option value="updated">По обновлению</option>
+              <option value="name">По названию</option>
+              <option value="stars">По звёздам</option>
+            </select>
+          </div>
+          <div class="clone-status hidden" id="cloneStatus">
+            <div class="clone-status-text" id="cloneStatusText"></div>
+            <div class="progress-bar small"><div class="progress-fill" id="cloneFill"></div></div>
+          </div>
+          <div class="list" id="reposList"></div>
+        </section>
+
+        <!-- Релизы -->
+        <section class="view hidden" id="view-releases">
+          <div class="view-header">
+            <div>
+              <h2>Релизы</h2>
+              <p class="muted">Публикуйте новые версии программы с файлами для скачивания</p>
+            </div>
+            <div class="header-tools">
+              <select class="input release-repo-select" id="releaseRepoSelect"><option value="">Загрузка репозиториев...</option></select>
+              <button class="icon-btn" id="releasesRefreshBtn" title="Обновить"><svg class="icon"><use href="#i-refresh"/></svg></button>
+            </div>
+          </div>
+
+          <div class="card" id="newReleaseCard">
+            <div class="card-title">Новый релиз</div>
+            <div class="grid-2 inner">
+              <div>
+                <div class="row-2">
+                  <div>
+                    <label class="field-label" for="releaseTag">Версия (тег)</label>
+                    <div class="input-icon">
+                      <svg class="icon"><use href="#i-tag"/></svg>
+                      <input type="text" id="releaseTag" class="input" placeholder="v1.0.0" spellcheck="false">
+                    </div>
+                  </div>
+                  <div>
+                    <label class="field-label" for="releaseTarget">Ветка</label>
+                    <div class="input-icon">
+                      <svg class="icon"><use href="#i-branch"/></svg>
+                      <input type="text" id="releaseTarget" class="input" placeholder="main" spellcheck="false">
+                    </div>
+                  </div>
+                </div>
+                <div class="tag-suggest" id="tagSuggest"></div>
+
+                <label class="field-label" for="releaseName">Название <span class="muted">(необязательно)</span></label>
+                <input type="text" id="releaseName" class="input" placeholder="Например: Версия 1.2 — новый интерфейс">
+
+                <label class="field-label" for="releaseBody">Что нового</label>
+                <textarea id="releaseBody" class="input textarea" rows="6" placeholder="- Добавлено ...&#10;- Исправлено ..."></textarea>
+                <label class="check"><input type="checkbox" id="releaseGenerate" checked><span class="box"></span>Дополнить списком изменений от GitHub (коммиты и PR)</label>
+              </div>
+
+              <div>
+                <label class="field-label">Файлы для скачивания</label>
+                <div class="dropzone small" id="releaseDrop" tabindex="0">
+                  <svg class="icon dz-icon"><use href="#i-file"/></svg>
+                  <div class="dz-text">
+                    <b>Перетащите файлы сюда</b>
+                    <span class="muted">.exe, .zip, .apk и любые другие</span>
+                  </div>
+                </div>
+                <div class="file-list" id="releaseFiles"></div>
+
+                <div class="release-options">
+                  <label class="check"><input type="checkbox" id="releasePrerelease"><span class="box"></span>Пре-релиз (тестовая версия)</label>
+                  <label class="check"><input type="checkbox" id="releaseDraft"><span class="box"></span>Черновик (не публиковать сразу)</label>
+                  <label class="check"><input type="checkbox" id="releaseOpenAfter"><span class="box"></span>Открыть релиз в браузере</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="actions release-actions">
+              <button class="btn btn-primary btn-lg" id="publishReleaseBtn" disabled>
+                <svg class="icon"><use href="#i-send"/></svg><span class="btn-label">Опубликовать релиз</span>
+              </button>
+              <button class="btn btn-ghost hidden" id="cancelReleaseBtn">Отмена</button>
+            </div>
+            <p class="hint center" id="releaseHint"></p>
+
+            <div class="release-progress hidden" id="releaseProgress">
+              <div class="progress-bar"><div class="progress-fill" id="releaseFill"></div></div>
+              <div class="progress-meta">
+                <span id="releaseProgressText">Подготовка...</span>
+                <span id="releaseProgressPercent">0%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title">
+            <span>Опубликованные релизы</span>
+            <span class="muted" id="releasesCount"></span>
+          </div>
+          <div class="list" id="releasesList"></div>
+        </section>
+
+        <!-- История -->
+        <section class="view hidden" id="view-history">
+          <div class="view-header">
+            <div>
+              <h2>История загрузок</h2>
+              <p class="muted">Последние загрузки с этого компьютера</p>
+            </div>
+            <button class="btn btn-ghost" id="clearHistoryBtn"><svg class="icon"><use href="#i-trash"/></svg>Очистить</button>
+          </div>
+          <div class="list" id="historyList"></div>
+        </section>
+
+        <!-- Настройки -->
+        <section class="view hidden" id="view-settings">
+          <div class="view-header">
+            <div>
+              <h2>Настройки</h2>
+              <p class="muted">Сохраняются автоматически</p>
+            </div>
+          </div>
+
+          <div class="card settings-card">
+            <div class="setting">
+              <div><b>Тема оформления</b><p class="muted">Светлая, тёмная или как в системе</p></div>
+              <div class="segmented" id="themeSeg">
+                <button data-value="dark">Тёмная</button>
+                <button data-value="light">Светлая</button>
+                <button data-value="system">Системная</button>
+              </div>
+            </div>
+            <div class="setting">
+              <div><b>Видимость по умолчанию</b><p class="muted">Для новых репозиториев</p></div>
+              <div class="segmented" id="defaultVisSeg">
+                <button data-value="public">Публичный</button>
+                <button data-value="private">Приватный</button>
+              </div>
+            </div>
+            <div class="setting">
+              <div><b>Ветка по умолчанию</b></div>
+              <input type="text" class="input setting-input" id="defaultBranchInput" spellcheck="false">
+            </div>
+            <div class="setting">
+              <div><b>Открывать репозиторий после загрузки</b></div>
+              <label class="switch"><input type="checkbox" id="openAfterSetting"><span></span></label>
+            </div>
+          </div>
+
+          <div class="card settings-card">
+            <div class="card-title">Автор коммитов</div>
+            <label class="radio"><input type="radio" name="authorMode" value="github"><span class="box"></span>
+              <div><b>Аккаунт GitHub</b><p class="muted" id="authorGithubHint">Имя профиля и приватный noreply-email</p></div></label>
+            <label class="radio"><input type="radio" name="authorMode" value="git"><span class="box"></span>
+              <div><b>Из настроек Git</b><p class="muted">user.name и user.email из git config</p></div></label>
+            <label class="radio"><input type="radio" name="authorMode" value="custom"><span class="box"></span>
+              <div><b>Указать вручную</b></div></label>
+            <div class="row-2 author-fields" id="authorFields">
+              <input type="text" class="input" id="authorNameInput" placeholder="Имя">
+              <input type="email" class="input" id="authorEmailInput" placeholder="Email">
+            </div>
+          </div>
+
+          <div class="card settings-card">
+            <div class="card-title">О программе</div>
+            <div class="about" id="aboutInfo"></div>
+            <div class="about-actions">
+              <button class="btn btn-ghost" id="openLogBtn">Открыть журнал ошибок</button>
+              <button class="btn btn-ghost" id="tokenSettingsBtn">Управление токенами на GitHub</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts"></div>
+
+  <div class="modal hidden" id="modal">
+    <div class="modal-box">
+      <h3 id="modalTitle"></h3>
+      <p id="modalText"></p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="modalCancel">Отмена</button>
+        <button class="btn btn-primary" id="modalOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="drop-overlay hidden" id="dropOverlay">
+    <svg class="icon"><use href="#i-folder"/></svg>
+    <span>Отпустите, чтобы выбрать папку</span>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
